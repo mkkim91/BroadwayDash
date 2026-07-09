@@ -101,6 +101,10 @@ button{cursor:pointer;font-family:inherit}
 .lead-score{font-family:'Fraunces',serif;font-weight:800;font-size:17px;width:26px;text-align:right}
 
 /* ── TICKET STUBS (Shows tab) ── */
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.fchip{background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:6px 14px;font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:1.2px;text-transform:uppercase;color:var(--ink-soft);transition:all .15s}
+.fchip:hover{border-color:var(--ink-faint);color:var(--ink)}
+.fchip.active{background:var(--yellow);border-color:var(--yellow);color:#1B1710;font-weight:600}
 .list-meta{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink-soft);margin-bottom:18px}
 .stubs{display:flex;flex-direction:column;gap:12px}
 .stub{display:flex;background:var(--panel);border:1px solid var(--line);border-radius:8px;box-shadow:var(--stub-shadow);overflow:hidden;position:relative;transition:transform .15s ease, box-shadow .15s ease}
@@ -153,7 +157,9 @@ button{cursor:pointer;font-family:inherit}
 
 @media(max-width:720px){
   .masthead{padding:28px 18px 0}
-  .tabs{padding:0 18px}
+  .tabs{padding:0 18px;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .tabs::-webkit-scrollbar{display:none}
+  .tab{white-space:nowrap;flex-shrink:0}
   .content{padding:28px 18px 60px}
   .grid-2-1,.grid-2{grid-template-columns:1fr}
   .stub-score{width:66px}
@@ -171,7 +177,7 @@ button{cursor:pointer;font-family:inherit}
     <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode"><span id="themeIcon">☾</span><span id="themeLabel">Dark</span></button>
   </div>
   <div class="title-block"><h1>MK's Broadway Journey</h1></div>
-  <p class="masthead-sub">A personal theater archive — <b id="subCount"></b> productions logged across Broadway, Papermill, Off-Broadway, and Seoul's Daehangno district.</p>
+  <p class="masthead-sub">A personal theater archive — <b id="subCount">43</b> productions logged across Broadway, Papermill, Off-Broadway, and Seoul's Daehangno district.</p>
 </header>
 
 <nav class="tabs">
@@ -188,6 +194,7 @@ button{cursor:pointer;font-family:inherit}
       <div class="panel">
         <div class="ptitle"><h2>Score Distribution</h2><span class="mono">All rated shows</span></div>
         <div class="chart-wrap"><canvas id="scoreChart"></canvas></div>
+        <p style="margin-top:12px;font-size:11px;color:var(--ink-faint);font-style:italic">Scores are personal enjoyment ratings, not objective theater criticism.</p>
       </div>
       <div class="panel">
         <div class="ptitle"><h2>By Venue</h2></div>
@@ -200,7 +207,7 @@ button{cursor:pointer;font-family:inherit}
         <div class="chart-wrap-sm"><canvas id="yearChart"></canvas></div>
       </div>
       <div class="panel">
-        <div class="ptitle"><h2>Audience Rating</h2></div>
+        <div class="ptitle"><h2>Content Rating</h2></div>
         <div class="chart-wrap-sm"><canvas id="familyChart"></canvas></div>
       </div>
     </div>
@@ -211,6 +218,7 @@ button{cursor:pointer;font-family:inherit}
   </div>
 
   <div id="tab-shows" class="tab-panel">
+    <div class="filters" id="filters"></div>
     <p class="list-meta" id="listMeta"></p>
     <div class="stubs" id="stubs"></div>
   </div>
@@ -318,9 +326,12 @@ function switchTab(btn,name){
   btn.classList.add('active');
 }
 
+const uniqueProductions=new Set(shows.map(s=>s.title)).size;
+
 /* ── STATS ── */
 const statDefs=[
-  {v:shows.length,l:'Shows Logged',s:'2018 – 2027',a:'var(--yellow)'},
+  {v:shows.length,l:'Viewings Logged',s:'2018 – 2027',a:'var(--yellow)'},
+  {v:uniqueProductions,l:'Unique Productions',s:'repeat visits excluded',a:'var(--yellow)'},
   {v:avg,l:'Average Score',s:`${scored.length} rated`,a:'var(--yellow)'},
   {v:shows.filter(s=>s.lottery).length,l:'Lottery Wins',s:'rush & code wins',a:'var(--teal)'},
   {v:shows.filter(s=>s.score===10).length,l:'Perfect 10s',s:'all Operation Mincemeat',a:'var(--red)'},
@@ -344,28 +355,56 @@ document.getElementById('leaderboard').innerHTML=topShows.map((s,i)=>`
     <span class="lead-score">${s.score}</span>
   </div>`).join('');
 
-/* ── TICKET STUBS ── */
+/* ── TICKET STUBS + FILTERS ── */
 const famLabel={Y:'Family',PG13:'PG-13',N:'Mature'};
-document.getElementById('listMeta').textContent=`${scored.length} rated · ${pendingScore} score pending · ${planned} upcoming`;
-document.getElementById('stubs').innerHTML=shows.map(s=>{
-  const cls=['stub',s.isOM?'stub-om':'',s.planned?'stub-planned':''].join(' ');
-  return `<div class="${cls}">
-    <div class="stub-score">
-      <span class="stub-score-num">${s.score!==null?s.score:'—'}</span>
-      <span class="stub-score-den">${s.score!==null?'/ 10':s.planned?'soon':'tbd'}</span>
-    </div>
-    <div class="stub-body">
-      <div class="stub-top">
-        <span class="stub-title">${s.title}</span>
-        <span class="chip chip-${s.family}">${famLabel[s.family]}</span>
-        ${s.lottery?'<span class="chip chip-lottery">Lottery</span>':''}
-        ${s.planned?'<span class="chip chip-upcoming">Upcoming</span>':''}
-        <span class="stub-date">${s.date} · ${s.venue}</span>
+const filterDefs=[
+  {id:'all',label:'All',fn:()=>true},
+  {id:'broadway',label:'Broadway',fn:s=>s.venue==='Broadway'},
+  {id:'papermill',label:'Paper Mill',fn:s=>s.venue==='Papermill'},
+  {id:'daehangno',label:'Daehangno',fn:s=>s.venue==='Daehangno'},
+  {id:'lottery',label:'Lottery',fn:s=>s.lottery},
+  {id:'family',label:'Family',fn:s=>s.family==='Y'},
+  {id:'mature',label:'Mature',fn:s=>s.family==='N'},
+  {id:'score8',label:'Score 8+',fn:s=>s.score!==null&&s.score>=8},
+  {id:'notom',label:'Not Mincemeat',fn:s=>!s.isOM},
+];
+let activeFilter='all';
+document.getElementById('filters').innerHTML=filterDefs.map(f=>
+  `<button class="fchip${f.id==='all'?' active':''}" data-f="${f.id}" onclick="setFilter('${f.id}',this)">${f.label}</button>`).join('');
+function setFilter(id,btn){
+  activeFilter=id;
+  document.querySelectorAll('.fchip').forEach(c=>c.classList.remove('active'));
+  btn.classList.add('active');
+  renderStubs();
+}
+function renderStubs(){
+  const fn=filterDefs.find(f=>f.id===activeFilter).fn;
+  const visible=shows.filter(fn);
+  const vScored=visible.filter(s=>s.score!==null);
+  const vPend=visible.filter(s=>s.pendingScore).length;
+  const vPlan=visible.filter(s=>s.planned).length;
+  document.getElementById('listMeta').textContent=`${visible.length} viewing${visible.length!==1?'s':''} · ${vScored.length} rated${vPend?` · ${vPend} score pending`:''}${vPlan?` · ${vPlan} upcoming`:''}`;
+  document.getElementById('stubs').innerHTML=visible.map(s=>{
+    const cls=['stub',s.isOM?'stub-om':'',s.planned?'stub-planned':''].join(' ');
+    return `<div class="${cls}">
+      <div class="stub-score">
+        <span class="stub-score-num">${s.score!==null?s.score:'—'}</span>
+        <span class="stub-score-den">${s.score!==null?'/ 10':s.planned?'soon':'tbd'}</span>
       </div>
-      ${s.comments?`<div class="stub-comment">${s.comments}</div>`:''}
-    </div>
-  </div>`;
-}).join('');
+      <div class="stub-body">
+        <div class="stub-top">
+          <span class="stub-title">${s.title}</span>
+          <span class="chip chip-${s.family}">${famLabel[s.family]}</span>
+          ${s.lottery?'<span class="chip chip-lottery">Lottery</span>':''}
+          ${s.planned?'<span class="chip chip-upcoming">Upcoming</span>':''}
+          <span class="stub-date">${s.date} · ${s.venue}</span>
+        </div>
+        ${s.comments?`<div class="stub-comment">${s.comments}</div>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+renderStubs();
 
 /* ── OM TAB ── */
 document.getElementById('omBlurb').innerHTML=`Seen <b>${omSeen.length} times</b> since February 2026, with ${planned} more booked — including a Providence tour stop — through Jan 2027. Every rated viewing has scored 9 or above, including two perfect 10s with full principals and one 10 with a standout cover. The show that changed everything.`;
