@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>MK's Broadway Journey</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,800;9..144,900&family=Archivo:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F7F3EA;
+  --panel:#FFFDF8;
+  --ink:#1B1710;
+  --ink-soft:rgba(27,23,16,.62);
+  --ink-faint:rgba(27,23,16,.38);
+  --line:rgba(27,23,16,.14);
+  --yellow:#FFD400;
+  --yellow-deep:#D9A800;
+  --red:#C8102E;
+  --teal:#0E7C66;
+  --amber:#A87900;
+  --purple:#6C4FD8;
+  --purple-soft:rgba(108,79,216,.12);
+  --stub-shadow:0 1px 0 rgba(27,23,16,.08), 0 3px 10px rgba(27,23,16,.05);
+}
+[data-theme="dark"]{
+  --bg:#131009;
+  --panel:#1D1810;
+  --ink:#F4EEDF;
+  --ink-soft:rgba(244,238,223,.62);
+  --ink-faint:rgba(244,238,223,.36);
+  --line:rgba(244,238,223,.14);
+  --yellow:#FFD400;
+  --yellow-deep:#FFD400;
+  --red:#FF5468;
+  --teal:#3DBFA4;
+  --amber:#E8C24A;
+  --purple:#A78BFA;
+  --purple-soft:rgba(167,139,250,.14);
+  --stub-shadow:0 1px 0 rgba(0,0,0,.4), 0 4px 14px rgba(0,0,0,.35);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font-family:'Archivo',sans-serif;min-height:100vh;transition:background .3s,color .3s}
+button{cursor:pointer;font-family:inherit}
+::-webkit-scrollbar{width:8px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--line);border-radius:4px}
+
+/* ── MASTHEAD ── */
+.masthead{max-width:1080px;margin:0 auto;padding:44px 32px 0}
+.masthead-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:26px}
+.masthead-date{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--ink-soft)}
+.theme-toggle{display:flex;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:7px 14px;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink);transition:border-color .2s}
+.theme-toggle:hover{border-color:var(--ink-faint)}
+.title-block{background:var(--yellow);color:#1B1710;display:inline-block;padding:10px 22px 12px;transform:rotate(-.6deg)}
+.title-block h1{font-family:'Fraunces',serif;font-weight:900;font-size:clamp(34px,6vw,58px);line-height:1;letter-spacing:-.5px;transform:rotate(.6deg)}
+.masthead-sub{margin-top:16px;font-size:15px;color:var(--ink-soft);max-width:520px;line-height:1.6}
+.masthead-sub b{color:var(--ink);font-weight:600}
+
+/* ── TABS ── */
+.tabs{max-width:1080px;margin:34px auto 0;padding:0 32px;display:flex;gap:8px;border-bottom:2px solid var(--ink);flex-wrap:wrap}
+.tab{background:none;border:none;font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--ink-soft);padding:12px 18px 13px;position:relative;top:2px;border-bottom:2px solid transparent;transition:color .15s}
+.tab:hover{color:var(--ink)}
+.tab.active{color:var(--ink);border-bottom-color:var(--ink);background:linear-gradient(to bottom,transparent 82%,var(--yellow) 82%)}
+
+/* ── LAYOUT ── */
+.content{max-width:1080px;margin:0 auto;padding:36px 32px 80px}
+.tab-panel{display:none}
+.tab-panel.active{display:block;animation:fadeUp .35s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){.tab-panel.active{animation:none}}
+
+/* ── STAT MARQUEE ── */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-bottom:40px}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:18px 20px;box-shadow:var(--stub-shadow);position:relative;overflow:hidden}
+.stat::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--stat-accent,var(--yellow))}
+.stat-value{font-family:'Fraunces',serif;font-weight:800;font-size:38px;line-height:1;letter-spacing:-1px}
+.stat-label{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:1.8px;text-transform:uppercase;color:var(--ink-soft);margin-top:8px}
+.stat-sub{font-size:11px;color:var(--ink-faint);margin-top:3px}
+
+/* ── PANELS ── */
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:26px;box-shadow:var(--stub-shadow)}
+.grid-2-1{display:grid;grid-template-columns:2fr 1fr;gap:18px;margin-bottom:18px}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px}
+.ptitle{display:flex;align-items:baseline;gap:10px;margin-bottom:20px}
+.ptitle h2{font-family:'Fraunces',serif;font-weight:800;font-size:19px;letter-spacing:-.2px}
+.ptitle .mono{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink-faint)}
+.chart-wrap{position:relative;height:210px}
+.chart-wrap-sm{position:relative;height:185px}
+
+/* ── LEADERBOARD ── */
+.lead-row{display:flex;align-items:center;gap:14px;padding:9px 0;border-bottom:1px dashed var(--line)}
+.lead-row:last-child{border-bottom:none}
+.lead-rank{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink-faint);width:20px;text-align:right}
+.lead-title{flex:1;font-size:14px;font-weight:500}
+.lead-date{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--ink-faint);letter-spacing:1px}
+.lead-bar{width:110px;height:5px;background:var(--line);border-radius:3px;overflow:hidden}
+.lead-fill{height:100%;border-radius:3px;background:var(--yellow-deep)}
+.lead-score{font-family:'Fraunces',serif;font-weight:800;font-size:17px;width:26px;text-align:right}
+
+/* ── TICKET STUBS (Shows tab) ── */
+.list-meta{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink-soft);margin-bottom:18px}
+.stubs{display:flex;flex-direction:column;gap:12px}
+.stub{display:flex;background:var(--panel);border:1px solid var(--line);border-radius:8px;box-shadow:var(--stub-shadow);overflow:hidden;position:relative;transition:transform .15s ease, box-shadow .15s ease}
+.stub:hover{transform:translateX(3px)}
+.stub-score{width:86px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border-right:2px dashed var(--line);position:relative;background:var(--score-bg,transparent)}
+.stub-score::before,.stub-score::after{content:'';position:absolute;right:-7px;width:12px;height:12px;border-radius:50%;background:var(--bg);border:1px solid var(--line)}
+.stub-score::before{top:-7px}
+.stub-score::after{bottom:-7px}
+.stub-score-num{font-family:'Fraunces',serif;font-weight:900;font-size:30px;line-height:1}
+.stub-score-den{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:1.5px;color:var(--ink-faint);text-transform:uppercase}
+.stub-body{flex:1;padding:15px 18px;min-width:0}
+.stub-top{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.stub-title{font-family:'Fraunces',serif;font-weight:800;font-size:17px;letter-spacing:-.2px}
+.stub-date{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:1.2px;color:var(--ink-faint);margin-left:auto;white-space:nowrap}
+.stub-comment{font-size:13px;color:var(--ink-soft);line-height:1.55;margin-top:6px}
+.chip{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:1.2px;text-transform:uppercase;padding:3px 8px;border-radius:3px;white-space:nowrap}
+.chip-Y{background:rgba(14,124,102,.12);color:var(--teal)}
+.chip-PG13{background:rgba(168,121,0,.13);color:var(--amber)}
+.chip-N{background:rgba(200,16,46,.1);color:var(--red)}
+.chip-lottery{background:var(--yellow);color:#1B1710;font-weight:600}
+.chip-upcoming{background:var(--purple-soft);color:var(--purple)}
+.stub-om{--score-bg:var(--purple-soft)}
+.stub-om .stub-title{color:var(--purple)}
+.stub-planned{opacity:.68}
+.stub-planned .stub-score{border-right-style:dotted}
+
+/* ── OM TAB ── */
+.om-hero{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:36px;margin-bottom:18px;box-shadow:var(--stub-shadow);position:relative;overflow:hidden}
+.om-hero::before{content:'';position:absolute;top:0;left:0;bottom:0;width:6px;background:var(--purple)}
+.om-eyebrow{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--purple);margin-bottom:10px}
+.om-hero h2{font-family:'Fraunces',serif;font-weight:900;font-size:clamp(30px,5vw,44px);letter-spacing:-.5px;line-height:1.05}
+.om-hero p{margin-top:14px;font-size:15px;color:var(--ink-soft);max-width:560px;line-height:1.65}
+.om-stats{display:flex;gap:36px;margin-top:26px;flex-wrap:wrap}
+.om-stat-v{font-family:'Fraunces',serif;font-weight:800;font-size:32px;color:var(--purple);line-height:1}
+.om-stat-l{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:1.8px;text-transform:uppercase;color:var(--ink-faint);margin-top:5px}
+.vlog{display:flex;flex-direction:column}
+.vrow{display:flex;gap:14px;padding:13px 0;border-bottom:1px dashed var(--line)}
+.vrow:last-child{border-bottom:none}
+.vnum{width:30px;height:30px;border-radius:50%;border:1.5px solid var(--purple);color:var(--purple);display:flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;font-weight:800;font-size:13px;flex-shrink:0}
+.vrow.planned{opacity:.6}
+.vrow.planned .vnum{border-style:dashed}
+.vmeta{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.vdate{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:1.2px;color:var(--ink-soft)}
+.vscore{font-family:'Fraunces',serif;font-weight:800;font-size:19px;color:var(--purple)}
+.vscore.perfect{color:var(--yellow-deep)}
+.vcomment{font-size:12.5px;color:var(--ink-soft);line-height:1.55;margin-top:3px}
+
+.footer{max-width:1080px;margin:0 auto;padding:0 32px 44px;text-align:center}
+.footer p{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:2.5px;text-transform:uppercase;color:var(--ink-faint)}
+
+@media(max-width:720px){
+  .masthead{padding:28px 18px 0}
+  .tabs{padding:0 18px}
+  .content{padding:28px 18px 60px}
+  .grid-2-1,.grid-2{grid-template-columns:1fr}
+  .stub-score{width:66px}
+  .stub-score-num{font-size:24px}
+  .stub-date{margin-left:0;width:100%}
+  .om-stats{gap:24px}
+}
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div class="masthead-bar">
+    <span class="masthead-date">Est. 2018 · Updated Jul 2026</span>
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode"><span id="themeIcon">☾</span><span id="themeLabel">Dark</span></button>
+  </div>
+  <div class="title-block"><h1>MK's Broadway Journey</h1></div>
+  <p class="masthead-sub">A personal theater archive — <b id="subCount"></b> productions logged across Broadway, Papermill, Off-Broadway, and Seoul's Daehangno district.</p>
+</header>
+
+<nav class="tabs">
+  <button class="tab active" onclick="switchTab(this,'overview')">Overview</button>
+  <button class="tab" onclick="switchTab(this,'shows')">Show Reviews</button>
+  <button class="tab" onclick="switchTab(this,'mincemeat')">Operation Mincemeat</button>
+</nav>
+
+<main class="content">
+
+  <div id="tab-overview" class="tab-panel active">
+    <div class="stats" id="stats"></div>
+    <div class="grid-2-1">
+      <div class="panel">
+        <div class="ptitle"><h2>Score Distribution</h2><span class="mono">All rated shows</span></div>
+        <div class="chart-wrap"><canvas id="scoreChart"></canvas></div>
+      </div>
+      <div class="panel">
+        <div class="ptitle"><h2>By Venue</h2></div>
+        <div class="chart-wrap"><canvas id="venueChart"></canvas></div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="panel">
+        <div class="ptitle"><h2>Shows per Year</h2></div>
+        <div class="chart-wrap-sm"><canvas id="yearChart"></canvas></div>
+      </div>
+      <div class="panel">
+        <div class="ptitle"><h2>Audience Rating</h2></div>
+        <div class="chart-wrap-sm"><canvas id="familyChart"></canvas></div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="ptitle"><h2>Top Non-Mincemeat Shows</h2><span class="mono">Leaderboard</span></div>
+      <div id="leaderboard"></div>
+    </div>
+  </div>
+
+  <div id="tab-shows" class="tab-panel">
+    <p class="list-meta" id="listMeta"></p>
+    <div class="stubs" id="stubs"></div>
+  </div>
+
+  <div id="tab-mincemeat" class="tab-panel">
+    <div class="om-hero">
+      <div class="om-eyebrow">Obsession Level: Maximum</div>
+      <h2>Operation Mincemeat</h2>
+      <p id="omBlurb"></p>
+      <div class="om-stats" id="omStats"></div>
+    </div>
+    <div class="grid-2">
+      <div class="panel">
+        <div class="ptitle"><h2>Score Across Viewings</h2></div>
+        <div class="chart-wrap"><canvas id="omChart"></canvas></div>
+      </div>
+      <div class="panel">
+        <div class="ptitle"><h2>Viewing Log</h2></div>
+        <div class="vlog" id="vlog"></div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<footer class="footer"><p>✦ MK's Broadway Journey · 2018 – 2027 ✦</p></footer>
+
+<script>
+/* ── DATA ── */
+const shows=[
+  {title:"Avenue Q",date:"2018",year:2018,lottery:false,family:"N",score:7,comments:"Mature comedy (Off-broadway)",venue:"Off-Broadway"},
+  {title:"Wicked",date:"2018",year:2018,lottery:false,family:"Y",score:8,comments:"Mezz - last row",venue:"Broadway"},
+  {title:"The Band's Visit",date:"2018",year:2018,lottery:false,family:"Y",score:7,comments:"Great score, unexpectedly moving",venue:"Broadway"},
+  {title:"Puffs!",date:"2019",year:2019,lottery:false,family:"Y",score:7,comments:"Harry Potter Parody (Off-broadway)",venue:"Off-Broadway"},
+  {title:"Little Mermaid",date:"2024",year:2024,lottery:false,family:"Y",score:7,comments:"Papermill Playhouse",venue:"Papermill"},
+  {title:"Back to the Future the Musical",date:"2024",year:2024,lottery:false,family:"Y",score:6,comments:"Just the movie again",venue:"Broadway"},
+  {title:"Frozen",date:"2025",year:2025,lottery:false,family:"Y",score:7,comments:"Papermill Playhouse",venue:"Papermill"},
+  {title:"Titanique (Off-broadway)",date:"Jan 2025",year:2025,lottery:false,family:"N",score:6,comments:"Mature Comedy",venue:"Off-Broadway"},
+  {title:"Aladdin",date:"Mar 2025",year:2025,lottery:false,family:"Y",score:8,comments:"Great ensemble energy",venue:"Broadway"},
+  {title:"The Lion King",date:"Sep 2025",year:2025,lottery:false,family:"Y",score:9,comments:"Spectacular theater logic",venue:"Broadway"},
+  {title:"Operation Mincemeat",date:"Feb 2026",year:2026,lottery:false,family:"PG13",score:10,comments:"Clever and smart, funny; does talk about historical war violence (Rear Mezz)",venue:"Broadway",isOM:true,viewing:1},
+  {title:"Come From Away",date:"Feb 2026",year:2026,lottery:false,family:"Y",score:8,comments:"Papermill Playhouse",venue:"Papermill"},
+  {title:"Operation Mincemeat",date:"Mar 2026",year:2026,lottery:false,family:"PG13",score:10,comments:"Last row Orchestra",venue:"Broadway",isOM:true,viewing:2},
+  {title:"Oh, Mary!",date:"Mar 2026",year:2026,lottery:false,family:"N",score:5,comments:"Mature comedy; Simu Liu is great",venue:"Broadway"},
+  {title:"Harry Potter and Cursed Child",date:"Mar 2026",year:2026,lottery:false,family:"Y",score:6,comments:"Harry Potter play with British National Treasure Tom Felton",venue:"Broadway"},
+  {title:"1776",date:"Apr 2026",year:2026,lottery:false,family:"PG13",score:7,comments:"Paper Mill limited Run, historically sensitive contexts",venue:"Papermill"},
+  {title:"Maybe Happy Ending",date:"Apr 2026",year:2026,lottery:true,family:"Y",score:8,comments:"Tony winner, 1 Act",venue:"Broadway"},
+  {title:"Burnout Paradise",date:"Apr 2026",year:2026,lottery:true,family:"Y",score:4,comments:"65 Minutes of stress and potential injury (for the actors, not the audience)",venue:"Broadway"},
+  {title:"Book of Mormon",date:"Apr 2026",year:2026,lottery:true,family:"N",score:9,comments:"Mature comedy",venue:"Broadway"},
+  {title:"Moulin Rouge",date:"Apr 2026",year:2026,lottery:false,family:"N",score:7,comments:"Very risque, not family friendly, Jukebox musical",venue:"Broadway"},
+  {title:"SIX the musical",date:"Apr 2026",year:2026,lottery:false,family:"PG13",score:6,comments:"Mentions of abuse and violence in historical context",venue:"Broadway"},
+  {title:"Wicked",date:"Apr 2026",year:2026,lottery:false,family:"PG13",score:8,comments:"Too famous; audiences can be rowdy (haggled for ticket)",venue:"Broadway"},
+  {title:"Titanique (Broadway)",date:"Apr 2026",year:2026,lottery:false,family:"N",score:9,comments:"Mature Comedy; FANTASTIC belting singers",venue:"Broadway"},
+  {title:"Schmigadoon",date:"Apr 2026",year:2026,lottery:false,family:"Y",score:9,comments:"I never watched The TV Show, but great score, Parody of Golden Age musical era",venue:"Broadway"},
+  {title:"Operation Mincemeat",date:"Apr 2026",year:2026,lottery:true,family:"PG13",score:9,comments:"Row B Orch, 2 understudy performers (Ariza Charlie and Jean u/s). Great microexpression view.",venue:"Broadway",isOM:true,viewing:3},
+  {title:"Beaches",date:"Apr 2026",year:2026,lottery:true,family:"PG13",score:5,comments:"I don't think this will make its capitalization back.",venue:"Broadway"},
+  {title:"The Outsiders",date:"Apr 2026",year:2026,lottery:true,family:"PG13",score:8,comments:"Half of main cast is u/s, Row B 108; high school required reading, very violent themes. Great performance; first 2 seats are splash zone.",venue:"Broadway"},
+  {title:"Rocky Horror Show",date:"May 2026",year:2026,lottery:false,family:"N",score:7,comments:"Great performance by Luke Evans! Tony nominee view. Finally got to see origin of Time Warp, UC Berkeley tradition.",venue:"Broadway"},
+  {title:"Operation Mincemeat",date:"May 2026",year:2026,lottery:false,family:"PG13",score:9,comments:"Row J - u/s Charlie & Hester.",venue:"Broadway",isOM:true,viewing:4},
+  {title:"MEXODUS",date:"May 2026",year:2026,lottery:false,family:"N",score:7,comments:"Very strong language, good material, high energy",venue:"Broadway"},
+  {title:"Operation Mincemeat",date:"May 2026",year:2026,lottery:true,family:"PG13",score:9,comments:"Mezz Row C; After GenAI leadership exam (passed!). Charlie and Ewen U/S. Great performance.",venue:"Broadway",isOM:true,viewing:5},
+  {title:"West Side Story",date:"May 2026",year:2026,lottery:false,family:"N",score:7,comments:"Papermill Playhouse; great original choreography",venue:"Papermill"},
+  {title:"The Lost Boys",date:"May 2026",year:2026,lottery:false,family:"N",score:7,comments:"Tony Nom view; exists solely for amazing set design.",venue:"Broadway"},
+  {title:"&Juliet",date:"May 2026",year:2026,lottery:false,family:"PG13",score:8,comments:"Last minute Rush tix Row G switch, great seat, fun concert vibes with hits from childhood",venue:"Broadway"},
+  {title:"Death Becomes Her",date:"May 2026",year:2026,lottery:false,family:"N",score:7,comments:"June end run show; felt more \"classic\"",venue:"Broadway"},
+  {title:"Mad Hatter the Musical",date:"Jun 2026",year:2026,lottery:false,family:"PG13",score:7,comments:"Daehangno original, choreography, Two Actors only. Original Score. Set in 1850 London, about laborers behind hat making.",venue:"Daehangno"},
+  {title:"Shear Madness",date:"Jun 2026",year:2026,lottery:false,family:"PG13",score:7,comments:"Daehangno production. Funny, interactive, interesting plot twist.",venue:"Daehangno"},
+  {title:"2호선 세입자 (Renters on Line 2)",date:"Jun 2026",year:2026,lottery:false,family:"Y",score:7,comments:"Daehangno original, funny and touching. Choreography involved.",venue:"Daehangno"},
+  {title:"Operation Mincemeat",date:"Jul 2026",year:2026,lottery:false,family:"PG13",score:null,comments:"Comeback OM - Row A; Robert's Hester cover",venue:"Broadway",isOM:true,viewing:6,pendingScore:true},
+  {title:"The Great Gatsby",date:"Jul 2026",year:2026,lottery:true,family:"PG13",score:7,comments:"I like the spectacle, ok score/book. Expensive show",venue:"Broadway"},
+  {title:"Operation Mincemeat",date:"Jul 2026",year:2026,lottery:true,family:"PG13",score:10,comments:"OM with work friend - Row C; Lexi R's Jean was greatly improved!",venue:"Broadway",isOM:true,viewing:7},
+  {title:"Operation Mincemeat",date:"Sep 2026",year:2026,lottery:false,family:"PG13",score:null,comments:"Providence Tour Stop view with friend",venue:"Tour",isOM:true,viewing:8,planned:true},
+  {title:"Operation Mincemeat",date:"Jan 2027",year:2027,lottery:false,family:"PG13",score:null,comments:"",venue:"Broadway",isOM:true,viewing:9,planned:true},
+];
+
+/* ── DERIVED ── */
+const scored=shows.filter(s=>s.score!==null);
+const avg=(scored.reduce((a,b)=>a+b.score,0)/scored.length).toFixed(1);
+const omShows=shows.filter(s=>s.isOM);
+const omSeen=omShows.filter(s=>!s.planned);
+const omScored=omShows.filter(s=>s.score!==null);
+const omAvg=(omScored.reduce((a,b)=>a+b.score,0)/omScored.length).toFixed(1);
+const planned=shows.filter(s=>s.planned).length;
+const pendingScore=shows.filter(s=>s.pendingScore).length;
+
+document.getElementById('subCount').textContent=shows.length;
+
+/* ── THEME ── */
+const root=document.documentElement;
+function setTheme(t){
+  root.setAttribute('data-theme',t);
+  document.getElementById('themeIcon').textContent=t==='dark'?'☀':'☾';
+  document.getElementById('themeLabel').textContent=t==='dark'?'Light':'Dark';
+  try{localStorage.setItem('mk-theme',t)}catch(e){}
+  buildCharts();
+}
+document.getElementById('themeToggle').onclick=()=>setTheme(root.getAttribute('data-theme')==='dark'?'light':'dark');
+try{const saved=localStorage.getItem('mk-theme');if(saved)root.setAttribute('data-theme',saved),document.getElementById('themeIcon').textContent=saved==='dark'?'☀':'☾',document.getElementById('themeLabel').textContent=saved==='dark'?'Light':'Dark'}catch(e){}
+
+/* ── TABS ── */
+function switchTab(btn,name){
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  btn.classList.add('active');
+}
+
+/* ── STATS ── */
+const statDefs=[
+  {v:shows.length,l:'Shows Logged',s:'2018 – 2027',a:'var(--yellow)'},
+  {v:avg,l:'Average Score',s:`${scored.length} rated`,a:'var(--yellow)'},
+  {v:shows.filter(s=>s.lottery).length,l:'Lottery Wins',s:'rush & code wins',a:'var(--teal)'},
+  {v:shows.filter(s=>s.score===10).length,l:'Perfect 10s',s:'all Operation Mincemeat',a:'var(--red)'},
+  {v:omSeen.length,l:'Mincemeat Seen',s:`${planned} more booked`,a:'var(--purple)'},
+];
+document.getElementById('stats').innerHTML=statDefs.map(d=>`
+  <div class="stat" style="--stat-accent:${d.a}">
+    <div class="stat-value">${d.v}</div>
+    <div class="stat-label">${d.l}</div>
+    <div class="stat-sub">${d.s}</div>
+  </div>`).join('');
+
+/* ── LEADERBOARD ── */
+const topShows=scored.filter(s=>!s.isOM).sort((a,b)=>b.score-a.score).slice(0,8);
+document.getElementById('leaderboard').innerHTML=topShows.map((s,i)=>`
+  <div class="lead-row">
+    <span class="lead-rank">${i+1}</span>
+    <span class="lead-title">${s.title}</span>
+    <span class="lead-date">${s.date}</span>
+    <span class="lead-bar"><span class="lead-fill" style="width:${s.score*10}%"></span></span>
+    <span class="lead-score">${s.score}</span>
+  </div>`).join('');
+
+/* ── TICKET STUBS ── */
+const famLabel={Y:'Family',PG13:'PG-13',N:'Mature'};
+document.getElementById('listMeta').textContent=`${scored.length} rated · ${pendingScore} score pending · ${planned} upcoming`;
+document.getElementById('stubs').innerHTML=shows.map(s=>{
+  const cls=['stub',s.isOM?'stub-om':'',s.planned?'stub-planned':''].join(' ');
+  return `<div class="${cls}">
+    <div class="stub-score">
+      <span class="stub-score-num">${s.score!==null?s.score:'—'}</span>
+      <span class="stub-score-den">${s.score!==null?'/ 10':s.planned?'soon':'tbd'}</span>
+    </div>
+    <div class="stub-body">
+      <div class="stub-top">
+        <span class="stub-title">${s.title}</span>
+        <span class="chip chip-${s.family}">${famLabel[s.family]}</span>
+        ${s.lottery?'<span class="chip chip-lottery">Lottery</span>':''}
+        ${s.planned?'<span class="chip chip-upcoming">Upcoming</span>':''}
+        <span class="stub-date">${s.date} · ${s.venue}</span>
+      </div>
+      ${s.comments?`<div class="stub-comment">${s.comments}</div>`:''}
+    </div>
+  </div>`;
+}).join('');
+
+/* ── OM TAB ── */
+document.getElementById('omBlurb').innerHTML=`Seen <b>${omSeen.length} times</b> since February 2026, with ${planned} more booked — including a Providence tour stop — through Jan 2027. Every rated viewing has scored 9 or above, including two perfect 10s with full principals and one 10 with a standout cover. The show that changed everything.`;
+document.getElementById('omStats').innerHTML=[[omSeen.length,'Viewings'],[omAvg,'Avg Score'],[omScored.filter(s=>s.score===10).length,'Perfect 10s']].map(([v,l])=>`
+  <div><div class="om-stat-v">${v}</div><div class="om-stat-l">${l}</div></div>`).join('');
+document.getElementById('vlog').innerHTML=omShows.map(s=>`
+  <div class="vrow${s.planned?' planned':''}">
+    <div class="vnum">${s.viewing}</div>
+    <div style="flex:1;min-width:0">
+      <div class="vmeta">
+        <span class="vdate">${s.date}${s.planned?' · UPCOMING':s.pendingScore?' · SCORE TBD':''}</span>
+        <span class="vscore${s.score===10?' perfect':''}">${s.score!==null?s.score:'—'}</span>
+      </div>
+      ${s.comments?`<div class="vcomment">${s.comments}</div>`:''}
+    </div>
+  </div>`).join('');
+
+/* ── CHARTS (theme-aware, rebuilt on toggle) ── */
+let charts=[];
+function cssVar(n){return getComputedStyle(root).getPropertyValue(n).trim()}
+function buildCharts(){
+  charts.forEach(c=>c.destroy());charts=[];
+  const ink=cssVar('--ink'),inkSoft=cssVar('--ink-soft'),inkFaint=cssVar('--ink-faint'),line=cssVar('--line');
+  const yellow=cssVar('--yellow'),yellowDeep=cssVar('--yellow-deep'),red=cssVar('--red'),teal=cssVar('--teal'),amber=cssVar('--amber'),purple=cssVar('--purple'),panel=cssVar('--panel');
+  Chart.defaults.color=inkSoft;
+  Chart.defaults.font.family="'IBM Plex Mono', monospace";
+  Chart.defaults.font.size=10;
+  const tt={backgroundColor:panel,borderColor:line,borderWidth:1,titleColor:ink,bodyColor:inkSoft,padding:10,cornerRadius:4};
+
+  const counts=Array.from({length:10},(_,i)=>scored.filter(s=>s.score===i+1).length);
+  charts.push(new Chart(document.getElementById('scoreChart'),{type:'bar',data:{labels:['1','2','3','4','5','6','7','8','9','10'],datasets:[{data:counts,backgroundColor:counts.map((_,i)=>i===9?red:i===8?yellowDeep:line),borderRadius:3,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...tt,callbacks:{title:i=>i[0].label+'/10',label:i=>`${i.raw} show${i.raw!==1?'s':''}`}}},scales:{x:{grid:{display:false},ticks:{color:inkSoft},border:{color:line}},y:{grid:{color:line},ticks:{color:inkFaint,stepSize:2},border:{display:false}}}}}));
+
+  const venues=['Broadway','Papermill','Off-Broadway','Daehangno','Tour'];
+  charts.push(new Chart(document.getElementById('venueChart'),{type:'doughnut',data:{labels:venues,datasets:[{data:venues.map(v=>shows.filter(s=>s.venue===v).length),backgroundColor:[yellowDeep,teal,red,purple,amber],borderWidth:2,borderColor:panel,hoverOffset:5}]},options:{responsive:true,maintainAspectRatio:false,cutout:'62%',plugins:{legend:{position:'bottom',labels:{color:ink,padding:12,boxWidth:10}},tooltip:tt}}}));
+
+  const yrs=[2018,2019,2024,2025,2026,2027];
+  charts.push(new Chart(document.getElementById('yearChart'),{type:'bar',data:{labels:yrs,datasets:[{data:yrs.map(y=>shows.filter(s=>s.year===y).length),backgroundColor:yellowDeep,borderRadius:3,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:tt},scales:{x:{grid:{display:false},ticks:{color:inkSoft},border:{color:line}},y:{grid:{color:line},ticks:{color:inkFaint,stepSize:5},border:{display:false}}}}}));
+
+  charts.push(new Chart(document.getElementById('familyChart'),{type:'doughnut',data:{labels:['Family','PG-13','Mature'],datasets:[{data:[shows.filter(s=>s.family==='Y').length,shows.filter(s=>s.family==='PG13').length,shows.filter(s=>s.family==='N').length],backgroundColor:[teal,amber,red],borderWidth:2,borderColor:panel,hoverOffset:5}]},options:{responsive:true,maintainAspectRatio:false,cutout:'62%',plugins:{legend:{position:'bottom',labels:{color:ink,padding:12,boxWidth:10}},tooltip:tt}}}));
+
+  charts.push(new Chart(document.getElementById('omChart'),{type:'line',data:{labels:omScored.map(s=>'V'+s.viewing),datasets:[{data:omScored.map(s=>s.score),borderColor:purple,backgroundColor:'transparent',borderWidth:2,pointBackgroundColor:omScored.map(s=>s.score===10?yellowDeep:purple),pointBorderColor:panel,pointBorderWidth:2,pointRadius:6,tension:.3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...tt,callbacks:{title:i=>'Viewing '+omScored[i[0].dataIndex].viewing+' · '+omScored[i[0].dataIndex].date,label:i=>'Score: '+i.raw}}},scales:{x:{grid:{display:false},ticks:{color:inkSoft},border:{color:line}},y:{min:8,max:10,grid:{color:line},ticks:{color:inkFaint,stepSize:1},border:{display:false}}}}}));
+}
+buildCharts();
+</script>
+</body>
+</html>
