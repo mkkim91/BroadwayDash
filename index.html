@@ -152,6 +152,27 @@ button{cursor:pointer;font-family:inherit}
 .vscore.perfect{color:var(--yellow-deep)}
 .vcomment{font-size:12.5px;color:var(--ink-soft);line-height:1.55;margin-top:3px}
 
+/* ── LOTTERY RESOURCES ── */
+.lot-intro{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:26px 28px;margin-bottom:18px;box-shadow:var(--stub-shadow);position:relative;overflow:hidden}
+.lot-intro::before{content:'';position:absolute;top:0;left:0;bottom:0;width:6px;background:var(--yellow)}
+.lot-intro h2{font-family:'Fraunces',serif;font-weight:900;font-size:26px;letter-spacing:-.3px;margin-bottom:10px}
+.lot-intro p{font-size:14.5px;color:var(--ink-soft);line-height:1.65;max-width:620px}
+.lot-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-bottom:18px}
+.lot-card{display:block;text-decoration:none;color:inherit;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:22px 24px;box-shadow:var(--stub-shadow);transition:transform .15s ease,border-color .15s ease}
+.lot-card:hover{transform:translateY(-3px);border-color:var(--yellow-deep)}
+.lot-card-top{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:8px}
+.lot-card h3{font-family:'Fraunces',serif;font-weight:800;font-size:19px;letter-spacing:-.2px}
+.lot-arrow{font-family:'IBM Plex Mono',monospace;font-size:14px;color:var(--yellow-deep);flex-shrink:0}
+.lot-url{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.8px;color:var(--ink-faint);margin-bottom:10px;word-break:break-all}
+.lot-desc{font-size:13.5px;color:var(--ink-soft);line-height:1.6}
+.lot-tag{display:inline-block;margin-top:12px;font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:1.2px;text-transform:uppercase;padding:3px 9px;border-radius:3px;background:var(--purple-soft);color:var(--purple)}
+.lot-tips{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:24px 28px;box-shadow:var(--stub-shadow)}
+.lot-tips ul{list-style:none;margin-top:6px}
+.lot-tips li{font-size:14px;color:var(--ink-soft);line-height:1.6;padding:9px 0 9px 22px;border-bottom:1px dashed var(--line);position:relative}
+.lot-tips li:last-child{border-bottom:none}
+.lot-tips li::before{content:'▸';position:absolute;left:0;color:var(--yellow-deep)}
+.lot-tips li b{color:var(--ink);font-weight:600}
+
 .footer{max-width:1080px;margin:0 auto;padding:0 32px 44px;text-align:center}
 .footer p{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:2.5px;text-transform:uppercase;color:var(--ink-faint)}
 
@@ -184,6 +205,7 @@ button{cursor:pointer;font-family:inherit}
   <button class="tab active" onclick="switchTab(this,'overview')">Overview</button>
   <button class="tab" onclick="switchTab(this,'shows')">Show Reviews</button>
   <button class="tab" onclick="switchTab(this,'mincemeat')">Operation Mincemeat</button>
+  <button class="tab" onclick="switchTab(this,'lottery')">Frugal Theater Tips</button>
 </nav>
 
 <main class="content">
@@ -239,6 +261,49 @@ button{cursor:pointer;font-family:inherit}
         <div class="ptitle"><h2>Viewing Log</h2></div>
         <div class="vlog" id="vlog"></div>
       </div>
+    </div>
+  </div>
+  <div id="tab-lottery" class="tab-panel">
+    <div class="lot-intro">
+      <h2>Where the Cheap Seats Live</h2>
+      <p>Four platforms run virtually every digital lottery and rush program on Broadway. Each operates independently, so entering one doesn't affect the others — the strategy is simply to enter all of them. <b id="lotWinCount"></b> of the viewings in this archive came from a lottery or rush win.</p>
+    </div>
+
+    <div class="lot-grid">
+      <a class="lot-card" href="https://rush.telecharge.com/" target="_blank" rel="noopener noreferrer">
+        <div class="lot-card-top"><h3>Telecharge Rush + Lottery</h3><span class="lot-arrow">↗</span></div>
+        <div class="lot-url">rush.telecharge.com</div>
+        <div class="lot-desc">Runs lotteries and same-day rush for all Shubert Organization houses — the Booth, Broadhurst, Music Box, Imperial, Majestic, Schoenfeld and more. Usually a couple dozen lotteries open on any given day. Each show has its own page; there's no master entry screen.</div>
+        <span class="lot-tag">Operation Mincemeat lives here</span>
+      </a>
+
+      <a class="lot-card" href="https://lottery.broadwaydirect.com/" target="_blank" rel="noopener noreferrer">
+        <div class="lot-card-top"><h3>Broadway Direct</h3><span class="lot-arrow">↗</span></div>
+        <div class="lot-url">lottery.broadwaydirect.com</div>
+        <div class="lot-desc">The official platform for Nederlander houses and several blockbusters — Hamilton, The Lion King, Aladdin, Schmigadoon. Free to enter; payment only if you win. Winners are drawn digitally after each lottery closes.</div>
+      </a>
+
+      <a class="lot-card" href="https://www.luckyseat.com/" target="_blank" rel="noopener noreferrer">
+        <div class="lot-card-top"><h3>Lucky Seat</h3><span class="lot-arrow">↗</span></div>
+        <div class="lot-url">luckyseat.com</div>
+        <div class="lot-desc">Handles lotteries for a rotating roster including Moulin Rouge, Book of Mormon, and Hadestown. Entries typically close the morning before the performance, with winners selected throughout the day.</div>
+      </a>
+
+      <a class="lot-card" href="https://www.todaytix.com/us/static/lotteryandrush" target="_blank" rel="noopener noreferrer">
+        <div class="lot-card-top"><h3>TodayTix Lottery &amp; Rush</h3><span class="lot-arrow">↗</span></div>
+        <div class="lot-url">todaytix.com/us/static/lotteryandrush</div>
+        <div class="lot-desc">App-only for both programs. Rush drops each morning first-come-first-served (usually 9 AM ET); lottery entries are drawn at random. Use the Lottery &amp; Rush filter to see what's participating, and turn on push notifications.</div>
+      </a>
+    </div>
+
+    <div class="lot-tips">
+      <div class="ptitle"><h2>Field Notes</h2><span class="mono">Learned the hard way</span></div>
+      <ul>
+        <li><b>Enter everything, every day.</b> Platforms run independently, so entries don't compete with each other. You can only win one show per time slot, but you can win a matinee and an evening.</li>
+        <li><b>Push notifications are non-negotiable</b> on TodayTix — claim windows are often only 30–60 minutes.</li>
+        <li><b>Rush beats lottery for certainty.</b> If you can be at a box office at opening, physical rush at Shubert houses is among the most reliably available in New York.</li>
+        <li><b>Check for show-specific codes.</b> Several of the wins logged here came through code-based entries rather than the open lottery.</li>
+      </ul>
     </div>
   </div>
 
@@ -307,6 +372,7 @@ const planned=shows.filter(s=>s.planned).length;
 const pendingScore=shows.filter(s=>s.pendingScore).length;
 
 document.getElementById('subCount').textContent=shows.length;
+document.getElementById('lotWinCount').textContent=shows.filter(s=>s.lottery).length;
 
 /* ── THEME ── */
 const root=document.documentElement;
